@@ -1,0 +1,26 @@
+{
+    "debug": true,
+    "log": {
+        "path": "./",
+        "name": "mms.log",
+        "level": "INFO",
+        "console" : false
+    },
+    "gate": {
+        "addr": ":5678"
+    },
+    "mail": {
+        "smtp": {
+            "addr": "smtp address",
+            "username": "username",
+            "password": "password",
+            "from": "mail title"
+        }
+    },
+    "wechat": {
+        "corp_id": "wechat corp id",
+        "secret": "sk",
+        "agent_id": 1
+    }
+}
+
