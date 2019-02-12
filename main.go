@@ -1,15 +1,11 @@
 package main
 
 import (
-	"crypto/sha1"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"net/url"
 	"os"
 	"path"
-	"sort"
 	"strings"
 
 	"net/http"
