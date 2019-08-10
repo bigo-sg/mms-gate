@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+    "bytes"
 	"os"
 	"path"
 	"strings"
@@ -39,6 +40,9 @@ type Configuration struct {
 		Secret  string `json:"secret"`
 		AgentId int    `json:"agent_id"`
 	}
+    WechatRobot struct {
+        Hook    string `json:"hook"`
+    } `json:"wechat_robot"`
 }
 
 const (
@@ -61,7 +65,6 @@ func WriteJsonOk(w http.ResponseWriter, body interface{}) {
 
 	je := json.NewEncoder(w)
 	if body != nil {
-
 		je.Encode(body)
 	} else {
 		je.Encode(map[string]interface{}{
@@ -195,6 +198,39 @@ func smsHandler(w http.ResponseWriter, r *http.Request) {
     // send sms here
 }
 
+func wechatRobotHandler(w http.ResponseWriter, r *http.Request) {
+	content := r.FormValue("content")
+	tos := r.FormValue("tos")
+	if content == "" || tos == "" {
+		WriteJsonError(w, 40001, "content or tos error")
+		return
+	}
+
+	client := &http.Client{}
+    m := make(map[string]interface{})
+    m["msgtype"] = "text"
+    m["text"] = map[string]string {
+        "content": content,
+    }
+
+    b, _ := json.Marshal(m)
+    if req, err := http.NewRequest("POST", Config.WechatRobot.Hook, bytes.NewReader(b)); err == nil {
+        req.Header.Set("Content-Type", "application/json")
+        resp, err := client.Do(req)
+		if err != nil {
+			log4go.Warn("post message error : %v", err)
+			return
+		} else {
+			r, _ := httputil.DumpRequest(req, true)
+			log4go.Info("req %q, body %s", r, b)
+			o, _ := httputil.DumpResponse(resp, true)
+			log4go.Info("resp %q", o)
+
+			log4go.Info("send message success")
+		}
+    }
+}
+
 func main() {
 	var err error
 	var conffile *os.File
@@ -236,8 +272,9 @@ func main() {
 
 	Wechat = NewWechatClient(Config.Wechat.Corp, Config.Wechat.Secret)
 
-	http.HandleFunc("/sms", wechatHandler)
-	http.HandleFunc("/mail", emailHandler)
+	//http.HandleFunc("/sms", wechatHandler)
+	//http.HandleFunc("/mail", emailHandler)
+	http.HandleFunc("/sms", wechatRobotHandler)
 
 	log4go.Info("server starts at : %s", Config.Gate.Addr)
 	log4go.Error(http.ListenAndServe(Config.Gate.Addr, nil))

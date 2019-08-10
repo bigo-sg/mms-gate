@@ -21,6 +21,9 @@
         "corp_id": "wechat corp id",
         "secret": "sk",
         "agent_id": 1
-    }
+    },
+    "wechat_robot": {
+        "hook": ""
+   }
 }
 
